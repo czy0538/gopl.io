@@ -11,21 +11,42 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"gopl.io/ch4/github"
 )
 
-//!+
+const (
+	year  = 24 * 365
+	month = 24 * 30
+)
+
+// !+
 func main() {
-	result, err := github.SearchIssues(os.Args[1:])
+	issueBody := github.IssueBody{
+		Title: "test",
+		Body:  time.Now().String(),
+	}
+	err := github.CreateIssue(os.Args[1:], &issueBody)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
-	fmt.Printf("%d issues:\n", result.TotalCount)
-	for _, item := range result.Items {
-		fmt.Printf("#%-5d %9.9s %.55s\n",
-			item.Number, item.User.Login, item.Title)
-	}
+
+	//result, err := github.SearchIssues(os.Args[1:])
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Printf("%d issues:\n", result.TotalCount)
+	//for _, item := range result.Items {
+	//	fmt.Printf("#%-5d %9.9s %s %.55s\n",
+	//		item.Number, item.User.Login, item.CreatedAt, item.Title)
+	//}
+	//
+	//sortByTimeResult := SortByTime(result)
+	//SortByTimePrint(sortByTimeResult, "less_than_one_month")
+	//SortByTimePrint(sortByTimeResult, "less_than_one_year")
+	//SortByTimePrint(sortByTimeResult, "more_than_one_year")
+
 }
 
 //!-
@@ -50,3 +71,34 @@ $ ./issues repo:golang/go is:open json decoder
 #4237  gjemiller encoding/base64: URLEncoding padding is optional
 //!-textoutput
 */
+
+func SortByTime(result *github.IssuesSearchResult) *map[string][]*github.Issue {
+	now := time.Now()
+	issuesTimeSortMap := make(map[string][]*github.Issue)
+	for _, item := range result.Items {
+		dt := now.Sub(item.CreatedAt)
+		if dt.Hours() < month {
+			issuesTimeSortMap["less_than_one_month"] = append(issuesTimeSortMap["less_than_one_month"], item)
+		} else if dt.Hours() < year {
+			issuesTimeSortMap["less_than_one_year"] = append(issuesTimeSortMap["less_than_one_year"], item)
+		} else {
+			issuesTimeSortMap["more_than_one_year"] = append(issuesTimeSortMap["more_than_one_year"], item)
+		}
+	}
+
+	return &issuesTimeSortMap
+}
+
+func SortByTimePrint(result *map[string][]*github.Issue, name string) bool {
+	items, ok := (*result)[name]
+	if ok {
+		fmt.Println(name)
+		for _, item := range items {
+			fmt.Printf("#%-5d %-9.9s %s %.55s\n",
+				item.Number, item.User.Login, item.CreatedAt, item.Title)
+		}
+		fmt.Println("")
+	}
+
+	return ok
+}

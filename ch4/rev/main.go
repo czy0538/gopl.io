@@ -17,7 +17,8 @@ import (
 func main() {
 	//!+array
 	a := [...]int{0, 1, 2, 3, 4, 5}
-	reverse(a[:])
+	//reverse(a[:])
+	reversePtr(&a)
 	fmt.Println(a) // "[5 4 3 2 1 0]"
 	//!-array
 
@@ -49,11 +50,17 @@ outer:
 	// NOTE: ignoring potential errors from input.Err()
 }
 
-//!+rev
+// !+rev
 // reverse reverses a slice of ints in place.
 func reverse(s []int) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
+	}
+}
+
+func reversePtr(p *[6]int) {
+	for i, j := 0, len(*p)-1; i < j; i, j = i+1, j-1 {
+		(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
 	}
 }
 

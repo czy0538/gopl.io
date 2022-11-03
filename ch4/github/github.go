@@ -11,6 +11,8 @@ package github
 import "time"
 
 const IssuesURL = "https://api.github.com/search/issues"
+const GithubAPIURL = "https://api.github.com"
+const GithubToken = "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"
 
 type IssuesSearchResult struct {
 	TotalCount int `json:"total_count"`
@@ -33,3 +35,8 @@ type User struct {
 }
 
 //!-
+
+type IssueBody struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}

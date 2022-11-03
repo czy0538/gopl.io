@@ -12,6 +12,7 @@ func main() {
 }
 
 func ex1() {
+
 	var s string
 	for _, t := range os.Args {
 		s += t + " "

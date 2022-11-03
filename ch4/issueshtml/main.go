@@ -38,13 +38,23 @@ var issueList = template.Must(template.New("issuelist").Parse(`
 
 //!-template
 
-//!+
+// !+
 func main() {
+	// 创建文件
+	out, err := os.Create("/Users/czy0538/Temp/issue.html")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	// 在main函数退出后关闭文件
+	defer out.Close()
+
 	result, err := github.SearchIssues(os.Args[1:])
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := issueList.Execute(os.Stdout, result); err != nil {
+
+	if err := issueList.Execute(out, result); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -6,8 +6,10 @@
 package github
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -51,3 +53,32 @@ func SearchIssues(terms []string) (*IssuesSearchResult, error) {
 }
 
 //!-
+
+func CreateIssue(terms []string, issueBody *IssueBody) error {
+
+	requestURL := GithubAPIURL + "/repos/" + strings.Join(terms, "/") + "/issues"
+	fmt.Println(requestURL)
+	body, err := json.Marshal(issueBody)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("POST", requestURL, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("Authorization", "Bearer "+GithubToken)
+
+	resp, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		resp.Body.Close()
+		return fmt.Errorf("create an issue failed: %s", resp.Status)
+	}
+	fmt.Println("Create issue success")
+	return nil
+}
