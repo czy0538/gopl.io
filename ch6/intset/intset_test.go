@@ -12,6 +12,7 @@ func Example_one() {
 	x.Add(144)
 	x.Add(9)
 	fmt.Println(x.String()) // "{1 9 144}"
+	fmt.Println(x.Len())
 
 	y.Add(9)
 	y.Add(42)
@@ -25,6 +26,7 @@ func Example_one() {
 
 	// Output:
 	// {1 9 144}
+	// 3
 	// {9 42}
 	// {1 9 42 144}
 	// true false
