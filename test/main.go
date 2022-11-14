@@ -2,27 +2,20 @@ package main
 
 import "fmt"
 
+var m = make(map[string]int)
+
 func main() {
-	stack := []int{}
-	testStack(stack, 0)
+	m["fuck"] = 1
+	m["fuc"] = 2
+	m["fu"] = 3
 
-	s := []int{1, 2}
-	change(&s)
-	fmt.Println(s)
-}
-
-func testStack(stack []int, n int) {
-	fmt.Printf("n=%d,statck:%v\n", n, stack)
-	if n == 3 {
-		return
+	for k, v := range m {
+		fmt.Printf("k:%v v%v\n", k, v)
+		v = 2
 	}
-	stack = append(stack, n)
-	for i := 0; i < 3; i++ {
-		testStack(stack, n+1)
-	}
-}
 
-func change(stack *[]int) {
-	*stack = append(*stack, 3)
-	(*stack)[0] = -1
+	v := m["fuck"]
+	v = 2
+	fmt.Println(v)
+	fmt.Println(m)
 }
