@@ -18,10 +18,14 @@ import (
 	"time"
 )
 
-//!+
+// !+
 var verbose = flag.Bool("v", false, "show verbose progress messages")
 
 func main() {
+	start := time.Now()
+	defer func() {
+		fmt.Printf("cost %v ms", time.Since(start).Microseconds())
+	}()
 	// ...start background goroutine...
 
 	//!-

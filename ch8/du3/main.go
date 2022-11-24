@@ -22,8 +22,13 @@ import (
 
 var vFlag = flag.Bool("v", false, "show verbose progress messages")
 
-//!+
+// !+
 func main() {
+	start := time.Now()
+	defer func() {
+		fmt.Printf("cost %v ms", time.Since(start).Microseconds())
+	}()
+
 	// ...determine roots...
 
 	//!-
@@ -82,7 +87,7 @@ func printDiskUsage(nfiles, nbytes int64) {
 
 // walkDir recursively walks the file tree rooted at dir
 // and sends the size of each found file on fileSizes.
-//!+walkDir
+// !+walkDir
 func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
 	defer n.Done()
 	for _, entry := range dirents(dir) {
@@ -98,7 +103,7 @@ func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
 
 //!-walkDir
 
-//!+sema
+// !+sema
 // sema is a counting semaphore for limiting concurrency in dirents.
 var sema = make(chan struct{}, 20)
 

@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-//!+
+// !+
 func main() {
 	conn, err := net.Dial("tcp", "localhost:8000")
 	if err != nil {
@@ -26,7 +26,11 @@ func main() {
 		done <- struct{}{} // signal the main goroutine
 	}()
 	mustCopy(conn, os.Stdin)
-	conn.Close()
+	//conn.Close()
+	//exec 8.3 仅关闭Write，保留Read
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		tcpConn.CloseWrite()
+	}
 	<-done // wait for background goroutine to finish
 }
 
