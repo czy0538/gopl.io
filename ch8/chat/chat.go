@@ -12,9 +12,12 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
-//!+broadcaster
+const timeout = 10
+
+// !+broadcaster
 type client chan<- string // an outgoing message channel
 
 var (
@@ -46,36 +49,65 @@ func broadcaster() {
 
 //!-broadcaster
 
-//!+handleConn
+// !+handleConn
 func handleConn(conn net.Conn) {
-	ch := make(chan string) // outgoing client messages
-	go clientWriter(conn, ch)
+	out := make(chan string) // outgoing client messages
+	reset := make(chan struct{})
+	tick := time.NewTicker(1 * time.Second)
 
-	who := conn.RemoteAddr().String()
-	ch <- "You are " + who
-	messages <- who + " has arrived"
-	entering <- ch
+	defer func() {
+		conn.Close()
+		tick.Stop()
+	}()
 
 	input := bufio.NewScanner(conn)
+
+	go clientWriter(conn, out)
+
+	go func() {
+		counter := 0
+		for {
+			select {
+			case <-tick.C:
+				counter++
+				if counter > timeout {
+					conn.Close()
+					return
+				}
+			case <-reset:
+				counter = 0
+			}
+		}
+	}()
+
+	who := conn.RemoteAddr().String()
+	if input.Scan() {
+		who = input.Text()
+	}
+	out <- "You are " + who
+	messages <- who + " has arrived\n"
+	entering <- out
+
 	for input.Scan() {
+		reset <- struct{}{}
 		messages <- who + ": " + input.Text()
 	}
 	// NOTE: ignoring potential errors from input.Err()
 
-	leaving <- ch
-	messages <- who + " has left"
-	conn.Close()
+	leaving <- out
+	messages <- who + " has left\n"
+
 }
 
-func clientWriter(conn net.Conn, ch <-chan string) {
-	for msg := range ch {
-		fmt.Fprintln(conn, msg) // NOTE: ignoring network errors
+func clientWriter(conn net.Conn, out <-chan string) {
+	for msg := range out {
+		fmt.Fprintf(conn, msg)
 	}
 }
 
 //!-handleConn
 
-//!+main
+// !+main
 func main() {
 	listener, err := net.Listen("tcp", "localhost:8000")
 	if err != nil {

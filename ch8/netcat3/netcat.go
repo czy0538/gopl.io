@@ -7,6 +7,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -25,6 +26,8 @@ func main() {
 		log.Println("done")
 		done <- struct{}{} // signal the main goroutine
 	}()
+	// 发送自己的名字
+	fmt.Println("Please input the name of local client")
 	mustCopy(conn, os.Stdin)
 	//conn.Close()
 	//exec 8.3 仅关闭Write，保留Read
